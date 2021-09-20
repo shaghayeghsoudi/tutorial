@@ -29,12 +29,13 @@ Much R code runs fast and fine on a single processor. But at times, computations
 
 
 To help with **cpu-bound** computations, we can take advantage of modern processor architectures that provide multiple cores on a single processor, and thereby enable multiple computations to take place at the same time. 
-In addition, some machines ship with multiple processors, allowing large computations to occur across the entire cluster of those computers. Plus, these machines also have large amounts of memory to avoid memory-bound computing jobs.
+In addition, some machines ship with multiple processors, allowing large computations to occur across the entire cluster of those computers. Plus, these machines also have large amounts of memory to avoid **memory-bound** computing jobs.
 
-Consider that we have a series of functions to run, f1, f2, etc.
-Serial processing means that f1 runs first, and until f1 completes, nothing else can run. Once f1 completes, f2 begins, and the process repeats.
 
-#Processors (CPUs) and Cores
+![Image of cpu](/Users/shaghayeghsoudi/Dropbox/Tutorials/images/core.png)
+
+
+# Processors (CPUs) and Cores
 
 A modern CPU (Central Processing Unit) is at the heart of every computer. Modern computers can ship with mutliple processors, which in turn can each contain multiple cores. These processors and cores are available to perform computations.
 
@@ -46,6 +47,8 @@ A typical modern computer has multiple cores, ranging from one or two in laptops
 ## image
 
 
+Consider that we have a series of functions to run, f1, f2, etc.
+Serial processing means that f1 runs first, and until f1 completes, nothing else can run. Once f1 completes, f2 begins, and the process repeats.
 
 You can think of this as allowing 16 computations to happen at the same time. Theroetically, your computation would take 1/16 of the time (but only theoretically, more on that later).
 
