@@ -28,7 +28,7 @@ Much R code runs fast and fine on a single processor. But at times, computations
 * network-bound: Take too much time to transfer
 
 
-To help with cpu-bound computations, we can take advantage of modern processor architectures that provide multiple cores on a single processor, and thereby enable multiple computations to take place at the same time. 
+To help with **cpu-bound** computations, we can take advantage of modern processor architectures that provide multiple cores on a single processor, and thereby enable multiple computations to take place at the same time. 
 In addition, some machines ship with multiple processors, allowing large computations to occur across the entire cluster of those computers. Plus, these machines also have large amounts of memory to avoid memory-bound computing jobs.
 
 Consider that we have a series of functions to run, f1, f2, etc.
