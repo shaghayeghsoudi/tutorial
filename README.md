@@ -6,9 +6,9 @@ September 20, 2021
 * Learning Outcomes
 * Understand what parallel computing is and when it may be useful
 * Understand how parallelism can work
-* Review sequential loops and *apply functions
-* Understand and use the parallel package multicore functions
-* Understand and use the foreach package functions
+* Review sequential loops and ```*apply``` functions
+* Understand and use the ```parallel``` package ```multicore``` functions
+* Understand and use the ```foreach``` package functions
 
 
 # Introduction
@@ -34,7 +34,12 @@ In addition, some machines ship with multiple processors, allowing large computa
 
 # Processors (CPUs) and Cores
 
-A modern CPU (Central Processing Unit) is at the heart of every computer. While traditional computers had a single CPU, modern computers can ship with mutliple processors, which in turn can each contain multiple cores. These processors and cores are available to perform computations.
+A modern CPU (Central Processing Unit) is at the heart of every computer. While traditional computers had a single CPU, modern computers can ship with mutliple processors, which in turn can each contain multiple cores. These processors and cores are available to perform computations. 
+
+# Some terminologies
+* A core: a general term for either a single processor on your own computer (technically you only have one processor, but a modern processor like the i7 can have multiple cores - hence the term) or a single machine in a cluster network.
+* A cluster: a collection of objecting capable of hosting cores, either a network or just the collection of cores on your personal computer.
+* A process: a single running version of R (or more generally any program). Each core runs a single process.
 
 A computer with one processor may still have 4 cores (quad-core), allowing 4 computations to be executed at the same time.
 
@@ -465,13 +470,14 @@ I showed examples of computing tasks that are likely limited by the number of CP
 
 
 # References
-[Quick Intro to Parallel Computing in R](https://nceas.github.io/oss-lessons/parallel-computing-in-r/parallel-computing-in-r.html)\
-[Parallel Processing in R](https://dept.stat.lsa.umich.edu/~jerrick/courses/stat701/notes/parallel.html)\
+[Quick Intro to Parallel Computing in R](https://nceas.github.io/oss-lessons/parallel-computing-in-r/parallel-computing-in-r.html) \
+[Parallel Processing in R](https://dept.stat.lsa.umich.edu/~jerrick/courses/stat701/notes/parallel.html) \
 [Parallelized loops with R](https://www.blasbenito.com/post/02_parallelizing_loops_with_r/#setup-of-a-parallel-backend)
 
 # More readings and tutorials
-[Beyond Single-Core R](https://ljdursi.github.io/beyond-single-core-R/#/)\
-[Multicore Data Science with R and Python](https://blog.dominodatalab.com/multicore-data-science-r-python/)\
+[Beyond Single-Core R](https://ljdursi.github.io/beyond-single-core-R/#/) \
+[Multicore Data Science with R and Python](https://blog.dominodatalab.com/multicore-data-science-r-python/) \
+[doParallel Vignette](https://cran.r-project.org/web/packages/doParallel/doParallel.pdf)
 
 
 
