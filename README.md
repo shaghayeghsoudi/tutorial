@@ -219,7 +219,7 @@ user  system elapsed
 
 # Parallelize using: ```foreach``` and ```doParallel```
 
-We can go beyond for loops by building loops with ```foreach``` \
+We can go beyond for loops by building loops with ```foreach```, the vignette [here](https://cran.r-project.org/web/packages/foreach/vignettes/foreach.html) \
 Many experienced R users frequently say that nobody should write loops with R because they are tacky or whatever. However, I find loops easy to write, read, and debug, and are therefore my workhorse whenever I need to repeat a task and I don’t feel like using ```apply()``` and the likes. However, regular for loops in R are highly inefficient, because they only use one of your computer cores to perform the iterations.
 
 The normal for loop in R looks like:
@@ -238,8 +238,8 @@ x
 ```
 
 
-This for loop above sorts vectors of random numbers a given number of times, and will only work on one of your computer cores for a few seconds, while the others are there, procrastinating with no shame.
-If every i could run in a different core, the operation would indeed run a bit faster, and we would get rid of lazy cores. This is were packages like ```foreach``` and ```doParallel``` come into play.
+This for loop above calulates square root of the numbers from 1 to 10, and will only work on one of your computer cores for a few seconds, while the others are there, procrastinating with no shame. If I could run in a different core, the operation would indeed run a bit faster, and we would get rid of lazy cores. This is were packages like ```foreach``` and ```doParallel``` come into play.
+
 
 Let's load the required packages.
 
@@ -323,7 +323,7 @@ x
 
 When running tasks in parallel, there should be a director node that tells a group of workers what to do with a given set of data and functions. The workers execute the iterations, and the director manages execution and gathers the results provided by the workers. A parallel backend provides the means for the director and workers to communicate, while allocating and managing the required computing resources (processors, RAM memory, and network bandwidth among others).
 
-There are two types of parallel backends that can be used with foreach, **FORK** and **PSOCK**.
+There are two types of parallel backends that can be used with ```foreach```, **FORK** and **PSOCK**.
 
 
 **FORK** \
@@ -423,7 +423,7 @@ If everything went well, now %dopar% should not be throwing the warning executin
 x <- iris[which(iris[,5] != "setosa"), c(1,5)]
 trials <- 10000
 system.time({
-  r <- (icount(trials), .combine=rbind) %dopar% {
+  r <- foreach(icount(trials), .combine=rbind) %dopar% {
     ind <- sample(100, 100, replace=TRUE)
     result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit))
     coefficients(result1)
