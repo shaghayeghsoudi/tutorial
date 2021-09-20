@@ -18,14 +18,7 @@ New types of sensing means the scale of data collection today is massive.
 And modeled outputs can be large as well.
 
 
-# Why parallelism?
 
-Much R code runs fast and fine on a single processor. But at times, computations can be:
-
-* cpu-bound: Take too much cpu time
-* memory-bound: Take too much memory
-* I/O-bound: Take too much time to read/write from disk
-* network-bound: Take too much time to transfer
 
 
 To help with **cpu-bound** computations, we can take advantage of modern processor architectures that provide multiple cores on a single processor, and thereby enable multiple computations to take place at the same time. 
