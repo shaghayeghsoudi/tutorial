@@ -1,6 +1,6 @@
 # Quick Intro to Parallel Computing in R
 
-Shaghayegh Soudi
+Shaghayegh Soudi,
 September 20, 2021
 
 * Learning Outcomes
@@ -38,12 +38,12 @@ A modern CPU (Central Processing Unit) is at the heart of every computer. While 
 
 A computer with one processor may still have 4 cores (quad-core), allowing 4 computations to be executed at the same time.
 
-![Image of cpu](core.png) 
+![Imageofcpu2](core.png) 
 
 
 A typical modern computer has multiple cores, ranging from one or two in laptops to thousands in high performance compute clusters. Here we show four quad-core processors for a total of 16 cores in this machine.
 
-![Image of cpu](cores2.png)
+![Imageofcpu](cores2.png)
 
 
 You can think of this as allowing 16 computations to happen at the same time. Theroetically, your computation would take 1/16 of the time (but only theoretically, more on that later).
@@ -57,7 +57,7 @@ Historically, R has only utilized one processor, which makes it single-threaded.
 This is a shame, because the 2016 MacBook Pro that I am writing this on is much more powerful than that:
 
 ```
-shaghayegh1364@shaghayeghs-iMac .ssh % sysctl hw.ncpu hw.physicalcpu
+$ sysctl hw.ncpu hw.physicalcpu
 hw.ncpu: 12
 hw.physicalcpu: 6
 ```
@@ -81,13 +81,14 @@ NUMA node3 CPU(s):     54-71,126-143
 
 # When to parallelize
 It’s not as simple as it may seem. While in theory each added processor would linearly increase the throughput of a computation, there is overhead that reduces that efficiency. For example, the code and, importantly, the data need to be copied to each additional CPU, and this takes time and bandwidth. Plus, new processes and/or threads need to be created by the operating system, which also takes time. This overhead reduces the efficiency enough that realistic performance gains are much less than theoretical, and usually do not scale linearly as a function of processing power. For example, if the time that a computation takes is short, then the overhead of setting up these additional resources may actually overwhelm any advantages of the additional processing power, and the computation could potentially take longer!
-note: sometimes a task cannot be paralellized at all. when?  for example, if f2 depended on the output of f1 before it could begin, even if we used multiple computers, we would gain no speed-ups
+
+**note**: sometimes a task cannot be paralellized at all. when?  for example, if f2 depended on the output of f1 before it could begin, even if we used multiple computers, we would gain no speed-ups
 
 
 # Loops and repetitive tasks using lapply
 
 
-When you have a list of repetitive tasks, you may be able to speed it up by adding more computing power. If each task is completely independent of the others, then it is a prime candidate for executing those tasks in parallel, each on its own core. For example, let’s build a simple loop that uses sample with replacement to do a bootstrap analysis. In this case, we select Sepal.Length and Species from the iris dataset, subset it to 100 observations, and then iterate across 10,000 trials, each time resampling the observations with replacement. We then run a logistic regression fitting species as a function of length, and record the coefficients for each trial to be returned.
+When you have a list of repetitive tasks, you may be able to speed it up by adding more computing power. If each task is completely independent of the others, then it is a prime candidate for executing those tasks in parallel, each on its own core. For example, let’s build a simple loop that uses sample with replacement to do a bootstrap analysis:
 
 ```
 x <- iris[which(iris[,5] != "setosa"), c(1,5)]
@@ -111,13 +112,15 @@ system.time({
 ##  20.031   0.458  21.220
 ```
 
-What is system.time?
+**Some terminologies**
 The total CPU time is the combination of the amount of time the CPU or CPUs spent performing some action for a program and the amount of time they spent performing system calls for the kernel on the program's behalf
 * User Time (user cpu time) is the wall clock time. The time that you as a user experienced.
 * System Time (system cpu time) gives the CPU time spent by the kernel (the operating system) on behalf of the current process
 * Elapsed Time is the time charged to the CPU(s) for the expression.
 
-The issue with this loop is that we execute each trial sequentially, which means that only one of our 8 processors on this machine are in use. In order to exploit parallelism, we need to be able to dispatch our tasks as functions, with one task going to each processor. To do that, we need to convert our task to a function, and then use the *apply() family of R functions to apply that function to all of the members of a set. In R, using apply is often significantly faster than the equivalent code in a loop. Here’s the same code rewritten to use lapply(), which applies a function to each of the members of a list (in this case the trials we want to run):
+
+
+The issue with this loop is that we execute each trial sequentially, which means that only one of our 12 processors on this machine are in use. In order to exploit parallelism, we need to be able to dispatch our tasks as functions, with one task going to each processor. To do that, we need to convert our task to a function, and then use the ```*apply()``` family of R functions to apply that function to all of the members of a set. In R, using ```apply``` is often significantly faster than the equivalent code in a loop. Here’s the same code rewritten to use ```lapply()```, which applies a function to each of the members of a list (in this case the trials we want to run):
 
 
 ```
@@ -149,11 +152,12 @@ When parallelizing jobs, one can:
         * This is extra work, but sometimes gaining access to a large cluster is worth it
 
 
-# Parallelize using: mclapply
-The parallel library can be used to send tasks (encoded as function calls) to each of the processing cores on your machine in parallel. This is done by using the parallel::mclapply function, which is analogous to lapply, but distributes the tasks to multiple processors. mclapply gathers up the responses from each of these function calls, and returns a list of responses that is the same length as the list or vector of input data (one return per input item).
+# Parallelize using: mclapply (Linux only)
+The ```parallel``` library can be used to send tasks (encoded as function calls) to each of the processing cores on your machine in parallel. This is done by using the ```parallel::mclapply``` function, which is analogous to lapply, but distributes the tasks to multiple processors. ```mclapply``` gathers up the responses from each of these function calls, and returns a list of responses that is the same length as the list or vector of input data (one return per input item).
 
 
 You can easily check the number of cores you have access to with detectCores:
+
 ```
 library(parallel)
 numCores <- detectCores()
@@ -187,12 +191,14 @@ system.time(save2 <- mclapply(1:100, f))
 ```
 
 
-By default, mclapply will use all cores available to it. If you don’t want to (either becaues you’re on a shared system or you just want to save processing power for other purposes) you can set this to a value lower than the number of cores you have. Setting it to 1 disables parallel processing, and setting it higher than the number of available cores has no effect.
+**note** By default, ```mclapply``` will use all cores available to it. If you don’t want to (either becaues you’re on a shared system or you just want to save processing power for other purposes) you can set this to a value lower than the number of cores you have. Setting it to 1 disables parallel processing, and setting it higher than the number of available cores has no effect.
+
+**note** Unfortunately, this approach only works on Linux. If you are working on a Windows machine, it will perform as a serial ```lapply```.
 
 
 Now let’s demonstrate with our bootstrap example:
 
-``
+```
 x <- iris[which(iris[,5] != "setosa"), c(1,5)]
 trials <- seq(1, 10000)
 boot_fx <- function(trial) {
@@ -215,8 +221,8 @@ user  system elapsed
 
 # Parallelize using: foreach and doParallel
 
-* Beyond for: building loops with foreach
-Many experienced R users frequently say that nobody should write loops with R because they are tacky or whatever. However, I find loops easy to write, read, and debug, and are therefore my workhorse whenever I need to repeat a task and I don’t feel like using apply() and the likes. However, regular for loops in R are highly inefficient, because they only use one of your computer cores to perform the iterations.
+* Beyond for: building loops with foreach:
+Many experienced R users frequently say that nobody should write loops with R because they are tacky or whatever. However, I find loops easy to write, read, and debug, and are therefore my workhorse whenever I need to repeat a task and I don’t feel like using ```apply()``` and the likes. However, regular for loops in R are highly inefficient, because they only use one of your computer cores to perform the iterations.
 
 The normal for loop in R looks like:
 
@@ -228,7 +234,6 @@ for(i in 1:10){
 x
 ```
 
-
 ```
 ##  [1] 1.000000 1.414214 1.732051 2.000000 2.236068 2.449490 2.645751 2.828427
 ##  [9] 3.000000 3.162278
@@ -236,7 +241,7 @@ x
 
 
 This for loop above sorts vectors of random numbers a given number of times, and will only work on one of your computer cores for a few seconds, while the others are there, procrastinating with no shame.
-If every i could run in a different core, the operation would indeed run a bit faster, and we would get rid of lazy cores. This is were packages like foreach and doParallel come into play
+If every i could run in a different core, the operation would indeed run a bit faster, and we would get rid of lazy cores. This is were packages like ```foreach``` and ```doParallel``` come into play.
 
 Let's load the required packages
 
@@ -272,15 +277,30 @@ x
 ...
 ```
 
-We can use the .combine argument of foreach to arrange the list as a vector. Other options such as cbind, rbind, or even custom functions can be used as well, only depending on the structure of the output of each iteration.
+We can use the ```.combine``` argument of foreach to arrange the list as a vector. Other options such as cbind, rbind, or even custom functions can be used as well, only depending on the structure of the output of each iteration.
 
+
+```
+x <- foreach(
+  i = 1:10, 
+  .combine = 'c'
+) %do% {
+    sqrt(i)
+  }
+x
+```
+
+```
+##  [1] 1.000000 1.414214 1.732051 2.000000 2.236068 2.449490 2.645751 2.82842 3.000000 3.162278
+```
 
 In addition, foreach supports a parallelizable operator %dopar% from the doParallel package. This allows each iteration through the loop to use different cores or different machines in a cluster. Here, we demonstrate with using all the cores on the current machine:
 
 
-* Running foreach loops in parallel
+* Running foreach loops in parallel:
 
-The foreach loops shown above use the operator %do%, that processes the tasks sequentially. To run tasks in parallel, foreach uses the operator %dopar%, that has to be supported by a parallel backend. If there is no parallel backend, %dopar% warns the user that it is being run sequentially, as shown below. But what the heck is a parallel backend?
+The foreach loops shown above use the operator %do%, that processes the tasks sequentially. To run tasks in parallel, foreach uses the operator ```%dopar%```, that has to be supported by a parallel backend. If there is no parallel backend,``` %dopar%``` warns the user that it is being run sequentially, as shown below. But what the heck is a parallel backend?
+
 
 ```
 x <- foreach(
@@ -301,11 +321,11 @@ x
 ```
 
 
-* What is a parallel backend?
+# What is a parallel backend?
 
 When running tasks in parallel, there should be a director node that tells a group of workers what to do with a given set of data and functions. The workers execute the iterations, and the director manages execution and gathers the results provided by the workers. A parallel backend provides the means for the director and workers to communicate, while allocating and managing the required computing resources (processors, RAM memory, and network bandwidth among others).
 
-There are two types of parallel backends that can be used with foreach, FORK and PSOCK.
+There are two types of parallel backends that can be used with foreach, **FORK** and **PSOCK**.
 
 
 * Setup of a parallel backend
