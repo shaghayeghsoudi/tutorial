@@ -38,12 +38,12 @@ A modern CPU (Central Processing Unit) is at the heart of every computer. While 
 
 A computer with one processor may still have 4 cores (quad-core), allowing 4 computations to be executed at the same time.
 
-![Imageofcpu2](core.png) 
+![Imageofcpu2](images/core.png) 
 
 
 A typical modern computer has multiple cores, ranging from one or two in laptops to thousands in high performance compute clusters. Here we show four quad-core processors for a total of 16 cores in this machine.
 
-![Imageofcpu](cores2.png)
+![Imageofcpu](images/cores2.png)
 
 
 You can think of this as allowing 16 computations to happen at the same time. Theroetically, your computation would take 1/16 of the time (but only theoretically, more on that later).
