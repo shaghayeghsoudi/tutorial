@@ -34,7 +34,7 @@ In addition, some machines ship with multiple processors, allowing large computa
 
 # Processors (CPUs) and Cores
 
-A modern CPU (Central Processing Unit) is at the heart of every computer. Modern computers can ship with mutliple processors, which in turn can each contain multiple cores. These processors and cores are available to perform computations.
+A modern CPU (Central Processing Unit) is at the heart of every computer. While traditional computers had a single CPU, modern computers can ship with mutliple processors, which in turn can each contain multiple cores. These processors and cores are available to perform computations.
 
 A computer with one processor may still have 4 cores (quad-core), allowing 4 computations to be executed at the same time.
 
