@@ -328,8 +328,18 @@ When running tasks in parallel, there should be a director node that tells a gro
 There are two types of parallel backends that can be used with foreach, **FORK** and **PSOCK**.
 
 
-* Setup of a parallel backend
-Here I explain how to setup the parallel backend for a simple computer 
+**FORK**FORK backends are only available on UNIX machines (Linux, Mac, and the likes), and do not work in clusters [sad face], so only single-machine environments are appropriate for this backend. In a FORK backend, the workers share the same environment (data, loaded packages, and functions) as the director. This setup is highly efficient because the main environment doesn’t have to be copied, and only worker outputs need to be sent back to the director.
+
+![Imageofcpu2](images/FORK.png) 
+
+
+**PSOCK**
+PSOCK backends (Parallel Socket Cluster) are available for both UNIX and WINDOWS systems, and are the default option provided with foreach. As their main disadvantage, the environment of the director needs to be copied to the environment of each worker, which increases network overhead while decreasing the overall efficiency of the cluster. By default, all the functions available in base R are copied to each worker, and if a particular set of R packages are needed in the workers, they need to be copied to the respective environments of the workers as well.
+
+![Imageofcpu2](images/PSOCK.png)
+
+# Setup of a parallel backend
+Here I explain how to setup the parallel backend for a simple computer. 
 
 Setting up a cluster in a single computer requires first to find out how many cores we want to use from the ones we have available. It is recommended to leave one free core for other tasks.
 
@@ -387,7 +397,7 @@ foreach::getDoParWorkers()
 ## [1] 7
 ```
 
-Now we can run a set of tasks in parallel!
+Now we can run a set of tasks in parallel, yayyy!
 
 ```
 x <- foreach(
@@ -403,44 +413,10 @@ x
 #[1] 1.000000 1.414214 1.732051 2.000000 2.236068 2.449490 2.645751 2.828427 3.000000 3.162278
 ```
 
-##########
+
+ Let's use the iris data set to do a parallel bootstrap
 
 ```
-# To simplify output, foreach has the .combine parameter that can simplify return values
-
-# Return a vector
-foreach (i=1:3, .combine=c) %dopar% {
-  sqrt(i)
-}
-```
-
-
-```
-## [1] 1.000000 1.414214 1.732051
-```
-
-
-```
-# Return a data frame
-foreach (i=1:3, .combine=rbind) %dopar% {
-  sqrt(i)
-}
-```
-
-
-```
-##              [,1]
-## result.1 1.000000
-## result.2 1.414214
-## result.3 1.732051
-```
-
-The doParallel vignette on CRAN shows a much more realistic example, where one can use `%dopar% to parallelize a bootstrap analysis where a data set is resampled 10,000 times and the analysis is rerun on each sample, and then the results combined:
-
-
-
-```
-# Let's use the iris data set to do a parallel bootstrap
 # From the doParallel vignette, but slightly modified
 x <- iris[which(iris[,5] != "setosa"), c(1,5)]
 trials <- 10000
@@ -476,10 +452,28 @@ system.time({
 ```
 
 
+When you're done, clean up the cluster
+
 ```
-# When you're done, clean up the cluster
 stopImplicitCluster()
 ```
+
+
+
+# Summary
+I showed examples of computing tasks that are likely limited by the number of CPU cores that can be applied, and reviewed the architecture of computers to understand the relationship between CPU processors and cores. Next, I reviewed the way in which traditional for loops in R can be rewritten as functions that are applied to a list serially using ```lapply```, and then how the ```parallel``` package ```mclapply``` function can be substituted in order to utilize multiple cores on the local computer to speed up computations. Finally, we installed and reviewed the use of the foreach package with the ```%dopar``` operator to accomplish a similar parallelization using multiple cores.
+
+
+# References
+[Quick Intro to Parallel Computing in R](https://nceas.github.io/oss-lessons/parallel-computing-in-r/parallel-computing-in-r.html)\
+[Parallel Processing in R](https://dept.stat.lsa.umich.edu/~jerrick/courses/stat701/notes/parallel.html)\
+[Parallelized loops with R](https://www.blasbenito.com/post/02_parallelizing_loops_with_r/#setup-of-a-parallel-backend)
+
+# More readings and tutorials
+[Beyond Single-Core R](https://ljdursi.github.io/beyond-single-core-R/#/)\
+[Multicore Data Science with R and Python](https://blog.dominodatalab.com/multicore-data-science-r-python/)\
+
+
 
 
 
