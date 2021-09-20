@@ -32,15 +32,13 @@ To help with **cpu-bound** computations, we can take advantage of modern process
 In addition, some machines ship with multiple processors, allowing large computations to occur across the entire cluster of those computers. Plus, these machines also have large amounts of memory to avoid **memory-bound** computing jobs.
 
 
-![Image of cpu](/Users/shaghayeghsoudi/Dropbox/Tutorials/images/core.png)
-
-
 # Processors (CPUs) and Cores
 
 A modern CPU (Central Processing Unit) is at the heart of every computer. Modern computers can ship with mutliple processors, which in turn can each contain multiple cores. These processors and cores are available to perform computations.
 
 A computer with one processor may still have 4 cores (quad-core), allowing 4 computations to be executed at the same time.
-## image 
+
+![Image of cpu](core.png) 
 
 
 A typical modern computer has multiple cores, ranging from one or two in laptops to thousands in high performance compute clusters. Here we show four quad-core processors for a total of 16 cores in this machine.
