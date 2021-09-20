@@ -42,15 +42,19 @@ A computer with one processor may still have 4 cores (quad-core), allowing 4 com
 
 
 A typical modern computer has multiple cores, ranging from one or two in laptops to thousands in high performance compute clusters. Here we show four quad-core processors for a total of 16 cores in this machine.
-## image
 
+![Image of cpu](cores2.png)
 
-Consider that we have a series of functions to run, f1, f2, etc.
-Serial processing means that f1 runs first, and until f1 completes, nothing else can run. Once f1 completes, f2 begins, and the process repeats.
 
 You can think of this as allowing 16 computations to happen at the same time. Theroetically, your computation would take 1/16 of the time (but only theoretically, more on that later).
 
-Historically, R has only utilized one processor, which makes it single-threaded. Which is a shame, because the 2017 MacBook Pro that I am writing this on is much more powerful than that:
+
+
+
+
+
+Historically, R has only utilized one processor, which makes it single-threaded.Consider that we have a series of functions to run, f1, f2, etc. Serial processing means that f1 runs first, and until f1 completes, nothing else can run. Once f1 completes, f2 begins, and the process repeats.
+This is a shame, because the 2016 MacBook Pro that I am writing this on is much more powerful than that:
 
 ```
 shaghayegh1364@shaghayeghs-iMac .ssh % sysctl hw.ncpu hw.physicalcpu
@@ -58,9 +62,9 @@ hw.ncpu: 12
 hw.physicalcpu: 6
 ```
 
-To interpret that output, this machine powder has 4 physical CPUs, each of which has two processing cores, for a total of 8 cores for computation. I’d sure like my R computations to use all of that processing power. Because its all on one machine, we can easily use multicore processing tools to make use of those cores.
+To interpret that output, my laptop powder has 6 physical CPUs, each of which has two processing cores, for a total of 12 cores for computation. I’d sure like my R computations to use all of that processing power. Because its all on one machine, we can easily use multicore processing tools to make use of those cores.
 
-Now let’s look at the computational server aurora at NCEAS:
+Now let’s look at the computational server gphost06:
 
 ```
 (base) [ssoudi@gphost06 ~]$ lscpu | egrep 'CPU\(s\)|per core|per socket'
@@ -74,23 +78,13 @@ NUMA node2 CPU(s):     36-53,108-125
 NUMA node3 CPU(s):     54-71,126-143
 ```
 
-##
-cluster
-
-
-
-
-
-
-Note that these clusters have multiple nodes (hosts), and each host has multiple cores. So this is really multiple computers clustered together to act in a coordinated fashion, but each node runs its own copy of the operating system, and is in many ways independent of the other nodes in the cluster. One way to use such a cluster would be to use just one of the nodes, and use a multi-core approach to parallelization to use all of the cores on that single machine. But to truly make use of the whole cluster, one must use parallelization tools that let us spread out our computations across multiple host nodes in the cluster.
-Parallel processing (in the extreme) means that all the f# processes start simultaneously and run to completion on their own.
 
 # When to parallelize
 It’s not as simple as it may seem. While in theory each added processor would linearly increase the throughput of a computation, there is overhead that reduces that efficiency. For example, the code and, importantly, the data need to be copied to each additional CPU, and this takes time and bandwidth. Plus, new processes and/or threads need to be created by the operating system, which also takes time. This overhead reduces the efficiency enough that realistic performance gains are much less than theoretical, and usually do not scale linearly as a function of processing power. For example, if the time that a computation takes is short, then the overhead of setting up these additional resources may actually overwhelm any advantages of the additional processing power, and the computation could potentially take longer!
 note: sometimes a task cannot be paralellized at all. when?  for example, if f2 depended on the output of f1 before it could begin, even if we used multiple computers, we would gain no speed-ups
 
 
-#Loops and repetitive tasks using lapply
+# Loops and repetitive tasks using lapply
 
 
 When you have a list of repetitive tasks, you may be able to speed it up by adding more computing power. If each task is completely independent of the others, then it is a prime candidate for executing those tasks in parallel, each on its own core. For example, let’s build a simple loop that uses sample with replacement to do a bootstrap analysis. In this case, we select Sepal.Length and Species from the iris dataset, subset it to 100 observations, and then iterate across 10,000 trials, each time resampling the observations with replacement. We then run a logistic regression fitting species as a function of length, and record the coefficients for each trial to be returned.
