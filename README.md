@@ -86,14 +86,15 @@ NUMA node3 CPU(s):     54-71,126-143
 
 # When to parallelize
 It’s not as simple as it may seem. While in theory each added processor would linearly increase the throughput of a computation, there is overhead that reduces that efficiency. For example, the code and, importantly, the data need to be copied to each additional CPU, and this takes time and bandwidth. Plus, new processes and/or threads need to be created by the operating system, which also takes time. This overhead reduces the efficiency enough that realistic performance gains are much less than theoretical, and usually do not scale linearly as a function of processing power. For example, if the time that a computation takes is short, then the overhead of setting up these additional resources may actually overwhelm any advantages of the additional processing power, and the computation could potentially take longer!
+So, its important to evaluate the computational efficiency of requests, and work to ensure that additional compute resources brought to bear will pay off in terms of increased work being done. 
 
-**note**: sometimes a task cannot be paralellized at all. when?  for example, if f2 depended on the output of f1 before it could begin, even if we used multiple computers, we would gain no speed-ups
+**note**: sometimes a task cannot be paralellized at all. when?  for example, if f2 depended on the output of f1 before it could begin, even if we used multiple computers, we would gain no speed-ups.
 
 
 # Loops and repetitive tasks using lapply
 
-
 When you have a list of repetitive tasks, you may be able to speed it up by adding more computing power. If each task is completely independent of the others, then it is a prime candidate for executing those tasks in parallel, each on its own core. For example, let’s build a simple loop that uses sample with replacement to do a bootstrap analysis:
+
 
 ```
 x <- iris[which(iris[,5] != "setosa"), c(1,5)]
@@ -116,14 +117,6 @@ system.time({
 ##    user  system elapsed 
 ##  20.031   0.458  21.220
 ```
-
-**Some terminologies**
-The total CPU time is the combination of the amount of time the CPU or CPUs spent performing some action for a program and the amount of time they spent performing system calls for the kernel on the program's behalf
-* User Time (user cpu time) is the wall clock time. The time that you as a user experienced.
-* System Time (system cpu time) gives the CPU time spent by the kernel (the operating system) on behalf of the current process
-* Elapsed Time is the time charged to the CPU(s) for the expression.
-
-
 
 The issue with this loop is that we execute each trial sequentially, which means that only one of our 12 processors on this machine are in use. In order to exploit parallelism, we need to be able to dispatch our tasks as functions, with one task going to each processor. To do that, we need to convert our task to a function, and then use the ```*apply()``` family of R functions to apply that function to all of the members of a set. In R, using ```apply``` is often significantly faster than the equivalent code in a loop. Here’s the same code rewritten to use ```lapply()```, which applies a function to each of the members of a list (in this case the trials we want to run):
 
@@ -224,9 +217,9 @@ user  system elapsed
 ```
 
 
-# Parallelize using: foreach and doParallel
+# Parallelize using: ```foreach``` and ```doParallel```
 
-* Beyond for: building loops with foreach:
+We can go beyond for loops by building loops with ```foreach``` \
 Many experienced R users frequently say that nobody should write loops with R because they are tacky or whatever. However, I find loops easy to write, read, and debug, and are therefore my workhorse whenever I need to repeat a task and I don’t feel like using ```apply()``` and the likes. However, regular for loops in R are highly inefficient, because they only use one of your computer cores to perform the iterations.
 
 The normal for loop in R looks like:
@@ -248,7 +241,7 @@ x
 This for loop above sorts vectors of random numbers a given number of times, and will only work on one of your computer cores for a few seconds, while the others are there, procrastinating with no shame.
 If every i could run in a different core, the operation would indeed run a bit faster, and we would get rid of lazy cores. This is were packages like ```foreach``` and ```doParallel``` come into play.
 
-Let's load the required packages
+Let's load the required packages.
 
 ```
 library(foreach)
@@ -256,8 +249,8 @@ library(doParallel)
 ```
 
 
-The foreach method is similar, but uses the sequential %do% operator to indicate an expression to run (I'll talk more about it a bit later). 
-Note the difference in the returned data structure. The foreach version returns a list with the results automatically
+The ```foreach``` method is similar to for loops, but uses the sequential ```%do%``` operator to indicate an expression to run (I'll talk more about it a bit later). 
+Note the difference in the returned data structure.
 
 ```
 x <- foreach(i = 1:10) %do% {
@@ -266,6 +259,8 @@ x <- foreach(i = 1:10) %do% {
 x
 ```
 
+
+The ```foreach``` version returns a list with the results automatically.
 
 ```
 ## [[1]]
@@ -282,7 +277,7 @@ x
 ...
 ```
 
-We can use the ```.combine``` argument of foreach to arrange the list as a vector. Other options such as cbind, rbind, or even custom functions can be used as well, only depending on the structure of the output of each iteration.
+We can use the ```.combine``` argument of ```foreach``` to arrange the list as a vector. Other options such as ```cbind```, ```rbind```, or even custom functions can be used as well, only depending on the structure of the output of each iteration.
 
 
 ```
@@ -299,12 +294,10 @@ x
 ##  [1] 1.000000 1.414214 1.732051 2.000000 2.236068 2.449490 2.645751 2.82842 3.000000 3.162278
 ```
 
-In addition, foreach supports a parallelizable operator %dopar% from the doParallel package. This allows each iteration through the loop to use different cores or different machines in a cluster. Here, we demonstrate with using all the cores on the current machine:
 
+# Running ```foreach``` loops in parallel
 
-* Running foreach loops in parallel:
-
-The foreach loops shown above use the operator %do%, that processes the tasks sequentially. To run tasks in parallel, foreach uses the operator ```%dopar%```, that has to be supported by a parallel backend. If there is no parallel backend,``` %dopar%``` warns the user that it is being run sequentially, as shown below. But what the heck is a parallel backend?
+The ```foreach``` loops shown above use the operator``` %do%```, that processes the tasks sequentially. To run tasks in parallel, foreach uses the operator ```%dopar%```, that has to be supported by a parallel backend. If there is no parallel backend,``` %dopar%``` warns the user that it is being run sequentially, as shown below. But what the heck is a parallel backend?
 
 
 ```
@@ -333,13 +326,16 @@ When running tasks in parallel, there should be a director node that tells a gro
 There are two types of parallel backends that can be used with foreach, **FORK** and **PSOCK**.
 
 
-**FORK**FORK backends are only available on UNIX machines (Linux, Mac, and the likes), and do not work in clusters [sad face], so only single-machine environments are appropriate for this backend. In a FORK backend, the workers share the same environment (data, loaded packages, and functions) as the director. This setup is highly efficient because the main environment doesn’t have to be copied, and only worker outputs need to be sent back to the director.
+**FORK** \
+FORK backends are only available on UNIX machines (Linux, Mac, and the likes). In a FORK backend, the workers share the same environment (data, loaded packages, and functions) as the director. This setup is highly efficient because the main environment doesn’t have to be copied, and only worker outputs need to be sent back to the director.
 
 ![Imageofcpu2](images/FORK.png) 
 
 
-**PSOCK**
-PSOCK backends (Parallel Socket Cluster) are available for both UNIX and WINDOWS systems, and are the default option provided with foreach. As their main disadvantage, the environment of the director needs to be copied to the environment of each worker, which increases network overhead while decreasing the overall efficiency of the cluster. By default, all the functions available in base R are copied to each worker, and if a particular set of R packages are needed in the workers, they need to be copied to the respective environments of the workers as well.
+**PSOCK** \
+PSOCK backends (Parallel Socket Cluster) are available for both UNIX and WINDOWS systems, and are the default option provided with ```foreach```. As their main disadvantage, the environment of the director needs to be copied to the environment of each worker, which increases network overhead while decreasing the overall efficiency of the cluster. By default, all the functions available in base R are copied to each worker, and if a particular set of R packages are needed in the workers, they need to be copied to the respective environments of the workers as well.
+
+[This post](https://www.r-bloggers.com/2019/06/parallel-r-socket-or-fork/) compares both backends and concludes that FORK is about a 40% faster than PSOCK.
 
 ![Imageofcpu2](images/PSOCK.png)
 
@@ -353,7 +349,7 @@ parallel::detectCores()
 ```
 
 ```
-## [1] 8
+## [1] 12
 ```
 
 ```
@@ -361,7 +357,7 @@ n.cores <- parallel::detectCores() - 1
 ```
 
 
-Now we need to define the cluster with parallel::makeCluster() and register it so it can be used by %dopar% with doParallel::registerDoParallel(my.cluster). The type argument of parallel::makeCluster() accepts the strings “PSOCK” and “FORK” to define the type of parallel backend to be used.
+Now we need to define the cluster with ```parallel::makeCluster()``` and register it so it can be used by ```%dopar%``` with ```doParallel::registerDoParallel(my.cluster)```. The ```type``` argument of ```parallel::makeCluster()``` accepts the strings “PSOCK” and “FORK” to define the type of parallel backend to be used.
 
 ```
 #create the cluster
@@ -375,7 +371,7 @@ print(my.cluster)
 ```
 
 ```
-## socket cluster with 7 nodes on host 'localhost'
+## socket cluster with 11 nodes on host 'localhost'
 ```
 
 
@@ -399,7 +395,7 @@ foreach::getDoParWorkers()
 ```
 
 ```
-## [1] 7
+## [1] 11
 ```
 
 Now we can run a set of tasks in parallel, yayyy!
@@ -418,6 +414,7 @@ x
 #[1] 1.000000 1.414214 1.732051 2.000000 2.236068 2.449490 2.645751 2.828427 3.000000 3.162278
 ```
 
+If everything went well, now %dopar% should not be throwing the warning executing %dopar% sequentially: no parallel backend registered, meaning that the parallel execution is working as it should.
 
  Let's use the iris data set to do a parallel bootstrap
 
@@ -426,13 +423,14 @@ x
 x <- iris[which(iris[,5] != "setosa"), c(1,5)]
 trials <- 10000
 system.time({
-  r <- foreach(icount(trials), .combine=rbind) %dopar% {
+  r <- (icount(trials), .combine=rbind) %dopar% {
     ind <- sample(100, 100, replace=TRUE)
     result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit))
     coefficients(result1)
   }
 })
 ```
+ 
 
 ```
 ##    user  system elapsed 
