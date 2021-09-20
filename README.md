@@ -17,17 +17,11 @@ Processing large amounts of data with complex models can be time consuming.
 New types of sensing means the scale of data collection today is massive. 
 And modeled outputs can be large as well.
 
-Example:
-
-
 
 # Why parallelism?
 
-Much R code runs fast and fine on a single processor and in a serial manner.
-Consider that we have a series of functions to run, f1, f2, etc.
-Serial processing means that f1 runs first, and until f1 completes, nothing else can run. Once f1 completes, f2 begins, and the process repeats.
+Much R code runs fast and fine on a single processor. But at times, computations can be:
 
-But at times, computations can be:
 * cpu-bound: Take too much cpu time
 * memory-bound: Take too much memory
 * I/O-bound: Take too much time to read/write from disk
@@ -37,7 +31,8 @@ But at times, computations can be:
 To help with cpu-bound computations, we can take advantage of modern processor architectures that provide multiple cores on a single processor, and thereby enable multiple computations to take place at the same time. 
 In addition, some machines ship with multiple processors, allowing large computations to occur across the entire cluster of those computers. Plus, these machines also have large amounts of memory to avoid memory-bound computing jobs.
 
-
+Consider that we have a series of functions to run, f1, f2, etc.
+Serial processing means that f1 runs first, and until f1 completes, nothing else can run. Once f1 completes, f2 begins, and the process repeats.
 
 #Processors (CPUs) and Cores
 
