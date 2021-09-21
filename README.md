@@ -91,7 +91,7 @@ So, its important to evaluate the computational efficiency of requests, and work
 **note**: sometimes a task cannot be paralellized at all. when?  for example, if f2 depended on the output of f1 before it could begin, even if we used multiple computers, we would gain no speed-ups.
 
 
-# Loops and repetitive tasks using ```Apply() family```
+# Loops and repetitive tasks using ```*apply() family```
 
 When you have a list of repetitive tasks, you may be able to speed it up by adding more computing power. If each task is completely independent of the others, then it is a prime candidate for executing those tasks in parallel, each on its own core. For example, let’s build a simple loop that uses sample with replacement to do a bootstrap analysis:
 
@@ -119,7 +119,7 @@ system.time({
 ```
 
 The issue with this loop is that we execute each trial sequentially, which means that only one of our 12 processors on this machine are in use. In order to exploit parallelism, we need to be able to dispatch our tasks as functions, with one task going to each processor. To do that, we need to convert our task to a function, and then use the ```*apply()``` family of R functions to apply that function to all of the members of a set. 
-The ```apply()``` family pertains to the R base package and is populated with functions to manipulate slices of data from matrices, arrays, lists and dataframes in a repetitive way. These functions allow crossing the data in a number of ways and avoid explicit use of loop constructs. They act on an input list, matrix or array and apply a named function with one or several optional arguments, see a tutorial [here](https://www.datacamp.com/community/tutorials/r-tutorial-apply-family?utm_source=adwords_ppc&utm_campaignid=1655852085&utm_adgroupid=61045434622&utm_device=c&utm_keyword=%2Bapply%20%2Bfamily%20%2Br&utm_matchtype=b&utm_network=g&utm_adpostion=&utm_creative=318880582467&utm_targetid=aud-522010995285:kwd-589281896574&utm_loc_interest_ms=&utm_loc_physical_ms=9001527&gclid=CjwKCAjwhaaKBhBcEiwA8acsHIvnbB5Dm4H5yTz7k2HHeaLo0gNVEUyXvJuS4ZezB3DpxdDFGdSpOhoC0VkQAvD_BwE#family). In R, using ```apply()``` family is often significantly faster than the equivalent code in a loop . Here’s the same code rewritten to use ```lapply()```, which applies a function to each of the members of a list (in this case the trials we want to run):
+The ```*apply()``` family pertains to the R base package and is populated with functions to manipulate slices of data from matrices, arrays, lists and dataframes in a repetitive way. These functions allow crossing the data in a number of ways and avoid explicit use of loop constructs. They act on an input list, matrix or array and apply a named function with one or several optional arguments, see a tutorial [here](https://www.datacamp.com/community/tutorials/r-tutorial-apply-family?utm_source=adwords_ppc&utm_campaignid=1655852085&utm_adgroupid=61045434622&utm_device=c&utm_keyword=%2Bapply%20%2Bfamily%20%2Br&utm_matchtype=b&utm_network=g&utm_adpostion=&utm_creative=318880582467&utm_targetid=aud-522010995285:kwd-589281896574&utm_loc_interest_ms=&utm_loc_physical_ms=9001527&gclid=CjwKCAjwhaaKBhBcEiwA8acsHIvnbB5Dm4H5yTz7k2HHeaLo0gNVEUyXvJuS4ZezB3DpxdDFGdSpOhoC0VkQAvD_BwE#family). In R, using ```*apply()``` family is often significantly faster than the equivalent code in a loop . Here’s the same code rewritten to use ```lapply()```, which applies a function to each of the members of a list (in this case the trials we want to run):
 
 
 ```
