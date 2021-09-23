@@ -91,7 +91,7 @@ So, its important to evaluate the computational efficiency of requests, and work
 **note**: sometimes a task cannot be paralellized at all. when?  for example, if f2 depended on the output of f1 before it could begin, even if we used multiple computers, we would gain no speed-ups.
 
 
-# Loops and repetitive tasks using ```*apply() family```
+# Loops and repetitive tasks using ```*apply()family```
 
 When you have a list of repetitive tasks, you may be able to speed it up by adding more computing power. If each task is completely independent of the others, then it is a prime candidate for executing those tasks in parallel, each on its own core. For example, let’s build a simple loop that uses sample with replacement to do a bootstrap analysis:
 
