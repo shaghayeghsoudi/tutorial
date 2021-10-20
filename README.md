@@ -13,14 +13,13 @@ September 20, 2021
 
 # Introduction
 
-Processing large amounts of data with complex models can be time consuming. 
-New types of sensing means the scale of data collection today is massive. 
-And modeled outputs can be large as well.
+Processing large amounts of data with complicated models can be time consuming. 
+New types of sensing means the scale of data collection today is massive and modeled outputs can be large as well. 
 
 
-# Why parallelism?
+# Why doing parallelism?
 
-Much R code runs fast and fine on a single processor. But at times, computations can be:
+Most of the R codes run fast and fine on a single processor. But at times, computations can be:
 
 * cpu-bound: Take too much cpu time
 * memory-bound: Take too much memory
